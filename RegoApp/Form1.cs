@@ -7,17 +7,11 @@ namespace RegoApp
     public partial class Form1 : Form
     {
         public List<string> plates = new();
-        private System.Windows.Forms.OpenFileDialog openFile = new()
-        {
-            Title = "Find Plates",
-            Filter = "TXT files (*.txt)|*.txt|All files (*.*)|*.*",
-            Multiselect = false,
-            RestoreDirectory = true,
-            InitialDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), @"..\..\..\..\")),
-        };
+        
         
         public int index;
 
+        // INIT
         public Form1()
         {
             InitializeComponent();
@@ -25,18 +19,7 @@ namespace RegoApp
             toolStripStatusLabel1.BackColor = Color.Green;
         }
 
-        // Update list function
-        private void UpdateList()
-        {
-            // Clear all items then sort then insert from list to listbox
-            listBox1.Items.Clear();
-            plates.Sort();
-            foreach (string i in plates) 
-            {
-                listBox1.Items.Add(i);
-            }
-            ResetStatus();
-        }
+        
         #region TOOLTIP
         // Reset Tooltip
         private void ResetStatus()
@@ -58,8 +41,20 @@ namespace RegoApp
         }
         #endregion
         
+        // Update list function
+        private void UpdateList()
+        {
+            // Clear all items then sort then insert from list to listbox
+            listBox1.Items.Clear();
+            plates.Sort();
+            foreach (string i in plates) 
+            {
+                listBox1.Items.Add(i);
+            }
+            ResetStatus();
+        }
         // Save Function
-        private void SaveFile(bool dialog)
+        private void SaveFile(bool overWrite)
         {
             SaveFileDialog saveFile = new()
             {
@@ -69,30 +64,41 @@ namespace RegoApp
                 Filter = "TXT files (*.txt)|*.txt|All files (*.*)|*.*",
                 InitialDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), @"..\..\..\..\")),
             };
+            
             try
             {
-                
-                if (saveFile.ShowDialog() == DialogResult.OK && dialog)
+                // For Button
+                if (!overWrite)
                 {
-                    using (StreamWriter sw = new StreamWriter(saveFile.FileName, dialog))
+                    if (saveFile.ShowDialog() == DialogResult.OK)
                     {
-                        foreach (string s in plates)
+                        using (StreamWriter sw = new StreamWriter(saveFile.FileName))
                         {
-                            sw.WriteLine(s);
+                            foreach (string s in plates)
+                            {
+                                sw.WriteLine(s);
+                            }
+                            sw.Close();
                         }
-                        sw.Close();
                     }
-                } else
+                } 
+                // For Closing
+                else if (overWrite)
                 {
                     int increment = 1;
+                    string saveName = $"demo_0{increment}.txt";
                     saveFile.FileName = $"demo_0{increment}.txt";
-                    if (File.Exists(saveFile.InitialDirectory + saveFile.FileName))
+
+                    do
                     {
                         increment++;
                         saveFile.FileName = $"demo_0{increment}.txt";
-                    }
-                    using (StreamWriter sw = new StreamWriter(saveFile.FileName, dialog))
+                        
+                    } while (File.Exists(saveFile.InitialDirectory + saveFile.FileName));
+                    string combined = saveFile.InitialDirectory + saveFile.FileName;
+                    using (StreamWriter sw = new StreamWriter(combined))
                     {
+                        Debug.WriteLine(saveFile.FileName);
                         foreach (string s in plates)
                         {
                             sw.WriteLine(s);
@@ -109,18 +115,17 @@ namespace RegoApp
                 MessageBox.Show("Unknown Error." + err);
             }
         }
-        #region EVENTS
-        // Exit Event
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        // Open Function
+        private void OpenFile()
         {
-            SaveFile(true);
-        }
-
-        #endregion
-        #region BUTTONS
-        // Open Button
-        private void btnOpen_Click(object sender, EventArgs e)
-        {
+            System.Windows.Forms.OpenFileDialog openFile = new()
+            {
+                Title = "Find Plates",
+                Filter = "TXT files (*.txt)|*.txt|All files (*.*)|*.*",
+                Multiselect = false,
+                RestoreDirectory = true,
+                InitialDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), @"..\..\..\..\")),
+            };
             if (openFile.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -145,6 +150,27 @@ namespace RegoApp
 
             }
         }
+
+        #region EVENTS
+
+        // Exit Event
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveFile(true);
+            MessageBox.Show("File has been saved", "Saved", MessageBoxButtons.OK);
+        }
+
+        #endregion
+
+        #region BUTTONS
+
+        // Open Button
+        private void btnOpen_Click(object sender, EventArgs e)
+        {
+            OpenFile();
+            DisplaySuccess("FILE OPENED");
+        }
+
         // Save Button
         private void btnSave_Click(object sender, EventArgs e)
         {
@@ -184,7 +210,7 @@ namespace RegoApp
             }            
         }
 
-        // Button for delete
+        // Delete Button
         private void btnDelete_Click(object sender, EventArgs e)
         {
             if (!String.IsNullOrEmpty(textBox1.Text))
@@ -196,7 +222,7 @@ namespace RegoApp
             }
         }
 
-        // Button for reset
+        // Reset Button
         private void btnReset_Click(object sender, EventArgs e)
         {
             plates.Clear();
@@ -204,8 +230,8 @@ namespace RegoApp
             UpdateList();
         }
 
-        // Button for tag
-        private void button6_Click(object sender, EventArgs e)
+        // Tag Button
+        private void tagButton_Click(object sender, EventArgs e)
         {
             string z = textBox1.Text;
             if (z.StartsWith("z"))
@@ -264,6 +290,7 @@ namespace RegoApp
         }
         #endregion
 
+        #region MOUSE EVENTS
         // Select an entry from listbox
         private void listBox1_Click(object sender, EventArgs e)
         {
@@ -292,8 +319,7 @@ namespace RegoApp
             }
         }
 
-        
+        #endregion
 
-        
     }
 }
