@@ -37,50 +37,27 @@ namespace RegoApp
             }
             ResetStatus();
         }
+        #region TOOLTIP
+        // Reset Tooltip
         private void ResetStatus()
         {
             toolStripStatusLabel1.Text = "";
             toolStripStatusLabel1.BackColor = Color.Empty;
         }
-        
+        // Display Tooltip Error        
         private void DisplayError(string err)
         {
             toolStripStatusLabel1.BackColor = Color.Red;
             toolStripStatusLabel1.Text = err;
         }
+        // Display Tooltip Success
         private void DisplaySuccess(string suc)
         {
             toolStripStatusLabel1.BackColor = Color.Green;
             toolStripStatusLabel1.Text = suc;
         }
-
-        // Open Button
-        private void btnOpen_Click(object sender, EventArgs e)
-        {
-            if (openFile.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    string filePath = openFile.FileName;
-                    using(StreamReader sr = new StreamReader(openFile.FileName))
-                    {
-                        string? line;
-                        while((line = sr.ReadLine()) != null)
-                        {
-                            plates.Add(line);
-                        }
-                        sr.Close();
-                    }
-                    UpdateList();
-                }
-                catch (Exception err)
-                {
-                    DisplayError(err.Message);
-                    MessageBox.Show("Unknown Error." + err);
-                }
-
-            }            
-        }
+        #endregion
+        
         // Save Function
         private void SaveFile(bool dialog)
         {
@@ -132,16 +109,46 @@ namespace RegoApp
                 MessageBox.Show("Unknown Error." + err);
             }
         }
-        
-        // Save Button
-        private void btnSave_Click(object sender, EventArgs e)
-        {
-            SaveFile(false);
-        }
+        #region EVENTS
         // Exit Event
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveFile(true);
+        }
+
+        #endregion
+        #region BUTTONS
+        // Open Button
+        private void btnOpen_Click(object sender, EventArgs e)
+        {
+            if (openFile.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string filePath = openFile.FileName;
+                    using (StreamReader sr = new StreamReader(openFile.FileName))
+                    {
+                        string? line;
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            plates.Add(line);
+                        }
+                        sr.Close();
+                    }
+                    UpdateList();
+                }
+                catch (Exception err)
+                {
+                    DisplayError(err.Message);
+                    MessageBox.Show("Unknown Error." + err);
+                }
+
+            }
+        }
+        // Save Button
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            SaveFile(false);
         }
 
         // Enter Button
@@ -177,38 +184,10 @@ namespace RegoApp
             }            
         }
 
-        // Select an entry from listbox
-        private void listBox1_Click(object sender, EventArgs e)
-        {
-            if (!String.IsNullOrEmpty((string?)listBox1.SelectedItem))
-            {
-                textBox1.Text = listBox1.SelectedItem.ToString();
-                index = listBox1.SelectedIndex;
-            }
-            else
-            {
-                DisplayError("ERROR");
-            }
-        }
-
-        // Double click for delete
-        private void listBox1_DoubleClick(object sender, EventArgs e)
-        {
-            if (!String.IsNullOrEmpty((string?)listBox1.SelectedItem))
-            {
-                plates.RemoveAt(listBox1.SelectedIndex);
-                UpdateList();
-                DisplaySuccess("SUCCESS");
-                textBox1.Clear();
-                textBox1.Focus();
-                DialogResult result = MessageBox.Show("You have deleted this entry", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
         // Button for delete
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty((string?)listBox1.SelectedItem))
+            if (!String.IsNullOrEmpty(textBox1.Text))
             {
                 plates.Remove(textBox1.Text);
                 UpdateList();
@@ -227,19 +206,20 @@ namespace RegoApp
 
         // Button for tag
         private void button6_Click(object sender, EventArgs e)
-        {   
+        {
             string z = textBox1.Text;
-            if (z.StartsWith("z")) 
+            if (z.StartsWith("z"))
             {
                 plates[index] = z.Remove(0, 1);
                 textBox1.Clear();
-            } else
+            }
+            else
             {
-                plates[index] = $"z{z}" ;
+                plates[index] = $"z{z}";
                 textBox1.Clear();
             }
             UpdateList();
-            
+
         }
 
         // Button for Binary Search
@@ -250,7 +230,8 @@ namespace RegoApp
             {
                 DisplaySuccess("SUCCESS");
                 MessageBox.Show($"{selected} is in the list.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            } else
+            }
+            else
             {
                 DisplayError("ERROR");
                 MessageBox.Show($"{selected} is not in the list.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -281,6 +262,37 @@ namespace RegoApp
                 textBox1.Focus();
             }
         }
+        #endregion
+
+        // Select an entry from listbox
+        private void listBox1_Click(object sender, EventArgs e)
+        {
+            if (!String.IsNullOrEmpty((string?)listBox1.SelectedItem))
+            {
+                textBox1.Text = listBox1.SelectedItem.ToString();
+                index = listBox1.SelectedIndex;
+            }
+            else
+            {
+                DisplayError("ERROR");
+            }
+        }
+
+        // Double click for delete
+        private void listBox1_DoubleClick(object sender, EventArgs e)
+        {
+            if (!String.IsNullOrEmpty((string?)listBox1.SelectedItem))
+            {
+                plates.RemoveAt(listBox1.SelectedIndex);
+                UpdateList();
+                DisplaySuccess("SUCCESS");
+                textBox1.Clear();
+                textBox1.Focus();
+                DialogResult result = MessageBox.Show("You have deleted this entry", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        
 
         
     }
