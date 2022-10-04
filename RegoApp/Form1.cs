@@ -7,8 +7,6 @@ namespace RegoApp
     public partial class Form1 : Form
     {
         public List<string> plates = new();
-        
-        
         public int index;
 
         // INIT
@@ -21,6 +19,7 @@ namespace RegoApp
 
         
         #region TOOLTIP
+        // Bottom left tooltip section
         // Reset Tooltip
         private void ResetStatus()
         {
@@ -40,22 +39,26 @@ namespace RegoApp
             toolStripStatusLabel1.Text = suc;
         }
         #endregion
-        
         // Update list function
+        // Called at the end of all buttons
         private void UpdateList()
         {
             // Clear all items then sort then insert from list to listbox
             listBox1.Items.Clear();
+            // Sort from list thend add to listbox
             plates.Sort();
             foreach (string i in plates) 
             {
                 listBox1.Items.Add(i);
             }
+            // For tooltip
             ResetStatus();
         }
+
         // Save Function
         private void SaveFile(bool overWrite)
         {
+            // Config + updated new function
             SaveFileDialog saveFile = new()
             {
                 RestoreDirectory = true,
@@ -67,9 +70,19 @@ namespace RegoApp
             
             try
             {
-                // For Button
+                // Save on Save Button
                 if (!overWrite)
                 {
+                    // Auto file name increment
+                    int increment = 1;
+                    saveFile.FileName = $"demo_0{increment}.txt";
+                    do
+                    {
+                        increment++;
+                        saveFile.FileName = $"demo_0{increment}.txt";
+
+                    } while (File.Exists(saveFile.InitialDirectory + saveFile.FileName));
+                    // Save function
                     if (saveFile.ShowDialog() == DialogResult.OK)
                     {
                         using (StreamWriter sw = new StreamWriter(saveFile.FileName))
@@ -82,13 +95,11 @@ namespace RegoApp
                         }
                     }
                 } 
-                // For Closing
+                // Save on App Closing
                 else if (overWrite)
                 {
                     int increment = 1;
-                    string saveName = $"demo_0{increment}.txt";
                     saveFile.FileName = $"demo_0{increment}.txt";
-
                     do
                     {
                         increment++;
@@ -106,7 +117,7 @@ namespace RegoApp
                         sw.Close();
                     }
                 }
-                
+                // Tooltip
                 DisplaySuccess("SAVED");
             }
             catch (Exception err)
@@ -115,9 +126,11 @@ namespace RegoApp
                 MessageBox.Show("Unknown Error." + err);
             }
         }
+
         // Open Function
         private void OpenFile()
         {
+            // Config
             System.Windows.Forms.OpenFileDialog openFile = new()
             {
                 Title = "Find Plates",
@@ -126,6 +139,7 @@ namespace RegoApp
                 RestoreDirectory = true,
                 InitialDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), @"..\..\..\..\")),
             };
+            // Open file then update list
             if (openFile.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -147,13 +161,13 @@ namespace RegoApp
                     DisplayError(err.Message);
                     MessageBox.Show("Unknown Error." + err);
                 }
-
             }
         }
 
         #region EVENTS
 
-        // Exit Event
+        // Exit App Event
+        // Save file on event
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveFile(true);
@@ -180,7 +194,7 @@ namespace RegoApp
         // Enter Button
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            // Check for empty input and duplicate
+            // Check if not empty input and duplicate
             if (!String.IsNullOrEmpty(textBox1.Text) && !listBox1.Items.Contains(textBox1.Text))
             {
                 plates.Add(textBox1.Text);
@@ -197,6 +211,7 @@ namespace RegoApp
         // Edit Button
         private void btnEdit_Click(object sender, EventArgs e)
         {
+            // Check if not empty input and duplicate
             if (!String.IsNullOrEmpty(textBox1.Text) && listBox1.SelectedIndex != -1)
             {
                 plates[index] = textBox1.Text;
@@ -233,6 +248,7 @@ namespace RegoApp
         // Tag Button
         private void tagButton_Click(object sender, EventArgs e)
         {
+            // Attach text with affix "z" if not already attached else clear
             string z = textBox1.Text;
             if (z.StartsWith("z"))
             {
@@ -245,12 +261,12 @@ namespace RegoApp
                 textBox1.Clear();
             }
             UpdateList();
-
         }
 
         // Button for Binary Search
         private void btnBinarySearch_Click(object sender, EventArgs e)
         {
+            // Search for text in text box return message box if true
             string selected = textBox1.Text;
             if (plates.BinarySearch(selected) >= 0)
             {
@@ -271,6 +287,8 @@ namespace RegoApp
         {
             string selected = textBox1.Text;
             bool found = false;
+            // Loop through all in list change boolean if found
+            // If looped and none is found display error
             foreach (var i in plates)
             {
                 if (i == selected)
@@ -291,7 +309,8 @@ namespace RegoApp
         #endregion
 
         #region MOUSE EVENTS
-        // Select an entry from listbox
+        // Single click
+        // Select an entry from listbox on single click
         private void listBox1_Click(object sender, EventArgs e)
         {
             if (!String.IsNullOrEmpty((string?)listBox1.SelectedItem))
@@ -305,7 +324,8 @@ namespace RegoApp
             }
         }
 
-        // Double click for delete
+        // Double click
+        // Delete on double click
         private void listBox1_DoubleClick(object sender, EventArgs e)
         {
             if (!String.IsNullOrEmpty((string?)listBox1.SelectedItem))
